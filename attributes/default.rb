@@ -1,4 +1,6 @@
 default['demoenv']['environment'] = "DEMO"
+default['demoenv']['datacenter_name'] = "#{node['demoenv']['environment']} DC"
+default['demoenv']['rack_name'] = "#{node['demoenv']['environment']} Rack"
 
 default['abiquo']['profile'] = "monolithic"
 default['abiquo']['ui_address_type'] = 'ipaddress'

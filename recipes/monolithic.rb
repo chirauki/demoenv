@@ -1,5 +1,6 @@
 # Some default properties
 node.set['abiquo']['properties']['abiquo.virtualfactory.kvm.fullVirt'] = false
+node.set['abiquo']['properties']['abiquo.appliancemanager.repositoryLocation'] = "#{node['ipaddress']}/opt/vm_repository"
 
 # Find Out monitoring IP and setup properties
 monitoring = search(:node, "role:demo-monitoring AND environment:#{node['demoenv']['environment']}")
@@ -48,3 +49,29 @@ iptables_rule "firewall-nfs"
 
 # Install Abiquo
 include_recipe "abiquo::default"
+
+file '/opt/vm_repository/.abiquo_repository' do 
+  content ''
+  owner 'root'
+  group 'root'
+end
+
+include_recipe "demoenv::lwrp"
+
+demoenv_datacenter node['demoenv']['datacenter_name'] do
+  location "Somewhere over the rainbows"
+  rs_address node['ipaddress']
+  abiquo_api_url 'https://localhost/api'
+  abiquo_username 'admin'
+  abiquo_password 'xabiquo'
+  action :create
+end
+
+demoenv_rack node['demoenv']['rack_name'] do
+  datacenter node['demoenv']['datacenter_name']
+  ha_enabled true
+  abiquo_api_url 'https://localhost/api'
+  abiquo_username 'admin'
+  abiquo_password 'xabiquo'
+  action :create
+end

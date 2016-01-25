@@ -2,18 +2,25 @@ default['demoenv']['environment'] = "DEMO"
 default['demoenv']['datacenter_name'] = "#{node['demoenv']['environment']} DC"
 default['demoenv']['rack_name'] = "#{node['demoenv']['environment']} Rack"
 
+default['system']['short_hostname'] = "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}"
+
 default['abiquo']['profile'] = "monolithic"
-default['abiquo']['ui_address_type'] = 'ipaddress'
 default['abiquo']['nfs']['location'] = nil
 default['abiquo']['properties']['abiquo.appliancemanager.checkMountedRepository'] = false
-default['abiquo']['ignore_failure'] = true
+default['abiquo']['properties']['abiquo.datacenter.id'] = node['system']['short_hostname']
+override['abiquo']['ui_address_type'] = 'fixed'
+override['abiquo']['ui_address'] = "#{node['ipaddress']}.xip.io"
+override['abiquo']['certificate']['common_name'] = "#{node['ipaddress']}.xip.io"
+override['abiquo']['certificate']['file'] = "/etc/pki/abiquo/#{node['ipaddress']}.xip.io.crt"
+override['abiquo']['certificate']['key_file'] = "/etc/pki/abiquo/#{node['ipaddress']}.xip.io.key"
 
 default['nfs']['port']['statd'] = 32765
 default['nfs']['port']['statd_out'] = 32766
 default['nfs']['port']['mountd'] = 32767
 default['nfs']['port']['lockd'] = 32768
 
-default['system']['short_hostname'] = "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}"
+
+default['selfsigned_certificate']['cn'] = "#{node['ipaddress']}.xip.io"
 
 default['chef_client']['interval'] = 300 # 5 min
 default['chef_client']['splay'] = 60 # 1 min

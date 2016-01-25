@@ -2,13 +2,9 @@ selinux_state "SELinux Permissive" do
     action :permissive
 end
 
-ruby_block "attach ip to hostname" do
-  block do
-    node.set['system']['short_hostname'] = "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub!(".", "-")}" unless 
-      node['system']['short_hostname'].eql? "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub!(".", "-")}"
-  end
-  action :run
-end
+node.set['system']['short_hostname'] = "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub(".", "-")}" unless 
+ node['system']['short_hostname'].eql? "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub(".", "-")}"
+
 
 # Find Out monolithic IP
 monolithics = search(:node, "role:demo-monolithic AND environment:#{node['demoenv']['environment']}")
@@ -43,18 +39,20 @@ else
 
     include_recipe "demoenv::lwrp"
 
-    demoenv_machine "#{node['ipaddress']}" do 
-      type "KVM"
-      port node['abiquo']['aim']['port']
-      datastore_name "/dev/vda1"
-      datastore_dir "/var/lib/virt"
-      service_nic "eth0"
-      datacenter node['demoenv']['datacenter_name']
-      rack node['demoenv']['rack_name']
-      abiquo_api_url "https://#{monolithic_ip}/api"
-      abiquo_username 'admin'
-      abiquo_password 'xabiquo'
-      action :create
+    if node['system']['short_hostname'].eql? "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub(".", "-")}"
+      demoenv_machine "#{node['ipaddress']}" do 
+        type "KVM"
+        port node['abiquo']['aim']['port']
+        datastore_name "/dev/vda1"
+        datastore_dir "/var/lib/virt"
+        service_nic "eth0"
+        datacenter node['demoenv']['datacenter_name']
+        rack node['demoenv']['rack_name']
+        abiquo_api_url "https://#{monolithic_ip}/api"
+        abiquo_username 'admin'
+        abiquo_password 'xabiquo'
+        action :create
+      end
     end
   else
     node.set['abiquo']['nfs']['location'] = nil

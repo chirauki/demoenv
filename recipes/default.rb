@@ -7,6 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
+# SSH keys
 users = data_bag_item('support-ssh-keys', 'users')
 users.delete('id')
 
@@ -21,7 +22,8 @@ end
 include_recipe "system::hostname"
 
 # Configure chef-client
-include_recipe "chef-client::default"
+include_recipe "chef-client"
+include_recipe "chef-client::config"
 
 # Perform demo env tunning
 include_recipe "demoenv::#{node['abiquo']['profile']}"

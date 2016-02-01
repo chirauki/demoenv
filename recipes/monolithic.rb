@@ -107,7 +107,7 @@ abiquo_datacenter node['demoenv']['datacenter_name'] do
   abiquo_password 'xabiquo'
   action :create
   only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
-  notifies :create, "demoenv_rack[#{node['demoenv']['rack_name']}]", :immediately
+  notifies :create, "abiquo_rack[#{node['demoenv']['rack_name']}]", :immediately
 end
 
 # Public Cloud Regions

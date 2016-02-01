@@ -2,6 +2,15 @@ selinux_state "SELinux Permissive" do
     action :permissive
 end
 
+r = gem_package "abiquo-api" do
+  gem_binary '/opt/chef/embedded/bin/gem'
+  action :nothing
+end
+
+r.run_action(:install)
+
+require 'abiquo-api'
+
 node.set['system']['short_hostname'] = "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub(".", "-")}" unless 
  node['system']['short_hostname'].eql? "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub(".", "-")}"
 

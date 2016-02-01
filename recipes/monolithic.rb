@@ -33,7 +33,7 @@ ruby_block "obtain a demo license" do
     require 'net/http'
     require 'json'
 
-    uri = URI.parse("https://www.abiquo.com/license.php")
+    uri = URI.parse(node['demoenv']['license_url'])
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
 
@@ -85,11 +85,11 @@ file '/opt/vm_repository/.abiquo_repository' do
 end
 
 # Included to use LWRPs
-include_recipe "demoenv::lwrp"
+# include_recipe "demoenv::lwrp"
 
 unless node['abiquo']['license'].nil? or node['abiquo']['license'].length == 0
   # Add license
-  demoenv_license 'add-demo-license' do
+  abiquo_license 'add-demo-license' do
     code node['abiquo']['license']
     abiquo_api_url 'http://localhost:8009/api'
     abiquo_username 'admin'
@@ -100,7 +100,7 @@ unless node['abiquo']['license'].nil? or node['abiquo']['license'].length == 0
 end
 
 # Create datacenter
-demoenv_datacenter node['demoenv']['datacenter_name'] do
+abiquo_datacenter node['demoenv']['datacenter_name'] do
   location "Somewhere over the rainbows"
   abiquo_api_url 'http://localhost:8009/api'
   abiquo_username 'admin'
@@ -116,7 +116,7 @@ regions = data_bag_item('demo-env-pcr', 'regions')
 regions.delete('id')
 
 regions['regions'].each do |region|
-  demoenv_public_cloud_region region['name'] do
+  abiquo_public_cloud_region region['name'] do
     region region['region']
     cloud_provider region['provider']
     abiquo_api_url 'http://localhost:8009/api'
@@ -128,7 +128,7 @@ regions['regions'].each do |region|
 end
 
 # Create rack
-demoenv_rack node['demoenv']['rack_name'] do
+abiquo_rack node['demoenv']['rack_name'] do
   datacenter node['demoenv']['datacenter_name']
   abiquo_api_url 'http://localhost:8009/api'
   abiquo_username 'admin'
@@ -137,7 +137,7 @@ demoenv_rack node['demoenv']['rack_name'] do
 end
 
 # Create Remote Services
-demoenv_remote_service "http://#{node['ipaddress']}:8009/vsm" do
+abiquo_remote_service "http://#{node['ipaddress']}:8009/vsm" do
   type "VIRTUAL_SYSTEM_MONITOR"
   datacenter [node['demoenv']['datacenter_name'], "DO ams2"]
   abiquo_api_url 'http://localhost:8009/api'
@@ -146,7 +146,7 @@ demoenv_remote_service "http://#{node['ipaddress']}:8009/vsm" do
   action :create
 end
 
-demoenv_remote_service "http://#{node['ipaddress']}:8009/nodecollector" do
+abiquo_remote_service "http://#{node['ipaddress']}:8009/nodecollector" do
   type "NODE_COLLECTOR"
   datacenter [node['demoenv']['datacenter_name'], "DO ams2"]
   abiquo_api_url 'http://localhost:8009/api'
@@ -155,7 +155,7 @@ demoenv_remote_service "http://#{node['ipaddress']}:8009/nodecollector" do
   action :create
 end
 
-demoenv_remote_service "http://#{node['ipaddress']}:8009/virtualfactory" do
+abiquo_remote_service "http://#{node['ipaddress']}:8009/virtualfactory" do
   type "VIRTUAL_FACTORY"
   datacenter [node['demoenv']['datacenter_name'], "DO ams2"]
   abiquo_api_url 'http://localhost:8009/api'
@@ -164,7 +164,7 @@ demoenv_remote_service "http://#{node['ipaddress']}:8009/virtualfactory" do
   action :create
 end
 
-demoenv_remote_service "http://#{node['ipaddress']}:8009/ssm" do
+abiquo_remote_service "http://#{node['ipaddress']}:8009/ssm" do
   type "STORAGE_SYSTEM_MONITOR"
   datacenter node['demoenv']['datacenter_name']
   abiquo_api_url 'http://localhost:8009/api'
@@ -173,7 +173,7 @@ demoenv_remote_service "http://#{node['ipaddress']}:8009/ssm" do
   action :create
 end
 
-demoenv_remote_service "https://#{node['ipaddress']}.xip.io:443/am" do
+abiquo_remote_service "https://#{node['ipaddress']}.xip.io:443/am" do
   type "APPLIANCE_MANAGER"
   uuid node['abiquo']['properties']['abiquo.datacenter.id']
   datacenter node['demoenv']['datacenter_name']
@@ -184,7 +184,7 @@ demoenv_remote_service "https://#{node['ipaddress']}.xip.io:443/am" do
   ignore_failure true
 end
 
-demoenv_remote_service "http://#{node['ipaddress']}:8009/bpm-async" do
+abiquo_remote_service "http://#{node['ipaddress']}:8009/bpm-async" do
   type "BPM_SERVICE"
   uuid node['abiquo']['properties']['abiquo.datacenter.id']
   datacenter node['demoenv']['datacenter_name']
@@ -194,7 +194,7 @@ demoenv_remote_service "http://#{node['ipaddress']}:8009/bpm-async" do
   action :create
 end
 
-demoenv_remote_service "http://#{node['ipaddress']}:8009/cpp" do
+abiquo_remote_service "http://#{node['ipaddress']}:8009/cpp" do
   type "CLOUD_PROVIDER_PROXY"
   datacenter "DO ams2"
   abiquo_api_url 'http://localhost:8009/api'

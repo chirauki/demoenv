@@ -37,10 +37,10 @@ else
     node.set['abiquo']['nfs']['location'] = nfs_share
     include_recipe "abiquo::setup_kvm"
 
-    include_recipe "demoenv::lwrp"
+    # include_recipe "demoenv::lwrp"
 
     if node['system']['short_hostname'].eql? "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub(".", "-")}"
-      demoenv_machine "#{node['ipaddress']}" do 
+      abiquo_machine "#{node['ipaddress']}" do 
         type "KVM"
         port node['abiquo']['aim']['port']
         datastore_name "/dev/vda1"

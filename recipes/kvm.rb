@@ -23,7 +23,7 @@ if monolithics.count > 0
   monolithic = monolithics.first
   
   # Get the IP for the NFS mount
-  monolithic_ip = monolithic['digital_ocean']['networks']['v4'][0]['ip_address']
+  monolithic_ip = monolithic['ipaddress']
 
   # Only know if the monolithic knows about us
   if monolithic['demoenv']['kvm_hosts']

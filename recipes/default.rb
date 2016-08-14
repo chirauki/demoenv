@@ -26,4 +26,12 @@ include_recipe "chef-client"
 include_recipe "chef-client::config"
 
 # Perform demo env tunning
-include_recipe "demoenv::#{node['abiquo']['profile']}"
+monolithic = search(:node, "role:demo-monolithic AND environment:#{node['demoenv']['environment']}")
+unless node['abiquo']['profile'] == "monitoring"
+  include_recipe "demoenv::#{node['abiquo']['profile']}"
+else
+  if monolithic.count > 0
+    node.set['abiquo']['monitoring']['rabbitmq']['host'] = monolithic.first['ipaddress']
+    include_recipe "demoenv::#{node['abiquo']['profile']}"
+  end
+end

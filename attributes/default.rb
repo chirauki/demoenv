@@ -13,6 +13,10 @@ override['abiquo']['ui_address'] = "#{node['ipaddress']}.xip.io"
 override['abiquo']['certificate']['common_name'] = "#{node['ipaddress']}.xip.io"
 override['abiquo']['certificate']['file'] = "/etc/pki/abiquo/#{node['ipaddress']}.xip.io.crt"
 override['abiquo']['certificate']['key_file'] = "/etc/pki/abiquo/#{node['ipaddress']}.xip.io.key"
+override['abiquo']['websockify']['port'] = 41337
+override['abiquo']['websockify']['crt'] = node['abiquo']['certificate']['file']
+override['abiquo']['websockify']['key'] = node['abiquo']['certificate']['key_file']
+# override['abiquo']['properties']['abiquo.server.api.location'] = "https://#{node[node['abiquo']['ui_address_type']]}/api"
 
 default['nfs']['port']['statd'] = 32765
 default['nfs']['port']['statd_out'] = 32766

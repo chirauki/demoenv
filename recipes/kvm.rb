@@ -49,7 +49,7 @@ else
     # include_recipe "demoenv::lwrp"
 
     if node['system']['short_hostname'].eql? "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub(".", "-")}"
-      abiquo_machine "#{node['ipaddress']}" do 
+      abiquo_api_machine "#{node['ipaddress']}" do 
         type "KVM"
         port node['abiquo']['aim']['port']
         datastore_name "/dev/vda1"

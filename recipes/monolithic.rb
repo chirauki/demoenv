@@ -215,6 +215,16 @@ abiquo_api_remote_service "http://#{node['ipaddress']}:8009/cpp" do
 end
 
 # Download some templates
+abiquo_api_remote_repository 'Repository 3.0' do
+  url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+  abiquo_api_url 'http://localhost:8009/api'
+  abiquo_username 'admin'
+  abiquo_password 'xabiquo'
+  action :create
+  only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+  ignore_failure true
+end
+
 abiquo_api_template_download 'yVM' do
   datacenter node['demoenv']['datacenter_name']
   remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
@@ -222,6 +232,8 @@ abiquo_api_template_download 'yVM' do
   abiquo_username 'admin'
   abiquo_password 'xabiquo'
   action :download
+  only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+  ignore_failure true
 end
 
 abiquo_api_template_download 'm0n0wall 1.3b18-i386' do
@@ -231,6 +243,8 @@ abiquo_api_template_download 'm0n0wall 1.3b18-i386' do
   abiquo_username 'admin'
   abiquo_password 'xabiquo'
   action :download
+  only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+  ignore_failure true
 end
 
 abiquo_api_template_download 'Centos 5.6 x86_64' do
@@ -240,4 +254,6 @@ abiquo_api_template_download 'Centos 5.6 x86_64' do
   abiquo_username 'admin'
   abiquo_password 'xabiquo'
   action :download
+  only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+  ignore_failure true
 end

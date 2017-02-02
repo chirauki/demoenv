@@ -13,8 +13,7 @@ default['abiquo']['profile'] = "monolithic"
 default['abiquo']['nfs']['location'] = nil
 default['abiquo']['properties']['abiquo.appliancemanager.checkMountedRepository'] = false
 default['abiquo']['properties']['abiquo.datacenter.id'] = node['system']['short_hostname']
-override['abiquo']['ui_address_type'] = 'fixed'
-override['abiquo']['ui_address'] = "#{node['ipaddress']}.xip.io"
+default['abiquo']['ui_config'] = { 'config.endpoint' => "https://#{node['ipaddress']}.xip.io/api" }
 override['abiquo']['certificate']['common_name'] = "#{node['ipaddress']}.xip.io"
 override['abiquo']['certificate']['file'] = "/etc/pki/abiquo/#{node['ipaddress']}.xip.io.crt"
 override['abiquo']['certificate']['key_file'] = "/etc/pki/abiquo/#{node['ipaddress']}.xip.io.key"

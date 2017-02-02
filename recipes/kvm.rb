@@ -1,15 +1,9 @@
+# Install Abiquo API gem
+include_recipe "abiquo_api::default"
+
 selinux_state "SELinux Permissive" do
     action :permissive
 end
-
-r = gem_package "abiquo-api" do
-  gem_binary '/opt/chef/embedded/bin/gem'
-  action :nothing
-end
-
-r.run_action(:install)
-
-require 'abiquo-api'
 
 node.set['system']['short_hostname'] = "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub(".", "-")}" unless 
  node['system']['short_hostname'].eql? "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub(".", "-")}"
@@ -24,6 +18,7 @@ if monolithics.count > 0
   
   # Get the IP for the NFS mount
   monolithic_ip = monolithic['ipaddress']
+  node.set['demoenv']['abiquo_connection_data']['abiquo_api_url'] = "https://#{monolithic_ip}.xip.io/api"
 
   # Only know if the monolithic knows about us
   if monolithic['demoenv']['kvm_hosts']
@@ -57,9 +52,7 @@ else
         service_nic "eth0"
         datacenter node['demoenv']['datacenter_name']
         rack node['demoenv']['rack_name']
-        abiquo_api_url "https://#{monolithic_ip}/api"
-        abiquo_username 'admin'
-        abiquo_password 'xabiquo'
+        abiquo_connection_data node['demoenv']['abiquo_connection_data']
         action :create
       end
     end

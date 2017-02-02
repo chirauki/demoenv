@@ -1,6 +1,11 @@
 default['demoenv']['environment'] = "DEMO"
 default['demoenv']['datacenter_name'] = "#{node['demoenv']['environment']} DC"
 default['demoenv']['rack_name'] = "#{node['demoenv']['environment']} Rack"
+default['demoenv']['abiquo_connection_data'] = { abiquo_api_url: 'http://localhost:8009/api',
+                                                 abiquo_username: 'admin',
+                                                 abiquo_password: 'xabiquo',
+                                                 connection_options: { ssl: { verify: false } }
+                                               }
 
 default['system']['short_hostname'] = "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}"
 
@@ -13,16 +18,14 @@ override['abiquo']['ui_address'] = "#{node['ipaddress']}.xip.io"
 override['abiquo']['certificate']['common_name'] = "#{node['ipaddress']}.xip.io"
 override['abiquo']['certificate']['file'] = "/etc/pki/abiquo/#{node['ipaddress']}.xip.io.crt"
 override['abiquo']['certificate']['key_file'] = "/etc/pki/abiquo/#{node['ipaddress']}.xip.io.key"
-override['abiquo']['websockify']['port'] = 41337
 override['abiquo']['websockify']['crt'] = node['abiquo']['certificate']['file']
 override['abiquo']['websockify']['key'] = node['abiquo']['certificate']['key_file']
-# override['abiquo']['properties']['abiquo.server.api.location'] = "https://#{node[node['abiquo']['ui_address_type']]}/api"
+override['abiquo']['properties']['abiquo.server.api.location'] = "https://#{node['ipaddress']}.xip.io/api"
 
 default['nfs']['port']['statd'] = 32765
 default['nfs']['port']['statd_out'] = 32766
 default['nfs']['port']['mountd'] = 32767
 default['nfs']['port']['lockd'] = 32768
-
 
 default['selfsigned_certificate']['cn'] = "#{node['ipaddress']}.xip.io"
 

@@ -1,3 +1,12 @@
+#
+# Cookbook Name:: demoenv
+# Recipe:: monolithic
+#
+# Copyright 2016, YOUR_COMPANY_NAME
+#
+# All rights reserved - Do Not Redistribute
+#
+
 # Install Abiquo API gem
 include_recipe "abiquo_api::default"
 
@@ -24,6 +33,20 @@ if kvm_hosts.count > 0
   # There are KVM hosts in the env!
   ips = kvm_hosts.map {|k| k['ipaddress'] }.join(",")
   node.set['demoenv']['kvm_hosts'] = ips
+
+  # Tunnels
+  tunnel_info = {}
+  kvm_hosts.each_with_index do |kvm, i|
+    tunnel_info[kvm['ipaddress']] = {
+      'tunnel_id' => i + 1,
+      'port' => 5000 + i,
+      'monolithic' => node['ipaddress']
+    }
+  end
+  node.set['demoenv']['tunnel_info'] = tunnel_info
+
+  # Setup the tunnels
+  include_recipe 'demoenv::tunnels_monolithic'
 end
 
 # Firewall
@@ -129,6 +152,8 @@ end
 abiquo_api_rack node['demoenv']['rack_name'] do
   datacenter node['demoenv']['datacenter_name']
   abiquo_connection_data node['demoenv']['abiquo_connection_data']
+  vlan_min 10
+  vlan_max 20
   action :nothing
   ignore_failure true
 end
@@ -184,6 +209,14 @@ abiquo_api_remote_service "http://#{node['ipaddress']}:8009/bpm-async" do
   ignore_failure true
 end
 
+abiquo_api_remote_service "omapi://#{node['ipaddress']}:7911/" do
+  type "DHCP_SERVICE"
+  datacenter node['demoenv']['datacenter_name']
+  abiquo_connection_data node['demoenv']['abiquo_connection_data']
+  action :create
+  ignore_failure true
+end
+
 abiquo_api_remote_service "http://#{node['ipaddress']}:8009/cpp" do
   type "CLOUD_PROVIDER_PROXY"
   datacenter "DO ams2"
@@ -226,4 +259,10 @@ abiquo_api_template_download 'Centos 5.6 x86_64' do
   action :download
   only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
   ignore_failure true
+end
+
+# Ensure DHCPd is present
+package 'dhcp'
+service 'dhcpd' do
+  action [:enable, :start]
 end

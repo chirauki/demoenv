@@ -57,6 +57,7 @@ GRAPH
     abiquo_api (~> 0.1.0)
     chef-client (~> 4.3.2)
     iptables (~> 2.0.1)
+    kernel-modules (~> 0.1.4)
     nfs (~> 2.2.6)
     ssh_authorized_keys (~> 0.3.0)
     system (~> 0.10.1)

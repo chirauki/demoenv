@@ -26,25 +26,46 @@ if monolithics.count > 0
   
   # Get the IP for the NFS mount
   monolithic_ip = monolithic['ipaddress']
-  node.set['demoenv']['abiquo_connection_data']['abiquo_api_url'] = "https://#{monolithic_ip}.xip.io/api"
+  node.set['demoenv']['abiquo_connection_data']['abiquo_api_url'] = "https://#{monolithic_ip}.nip.io/api"
 
   # Only know if the monolithic knows about us
   if monolithic['demoenv']['kvm_hosts']
-    do_mount = true if monolithic['demoenv']['kvm_hosts'].include?(node['ipaddress'])
+    do_mount_monolithic = true if monolithic['demoenv']['kvm_hosts'].include?(node['ipaddress'])
   end
 end
+
+# Find Out NFS IP
+nfss = search(:node, "role:demo-nfs AND environment:#{node['demoenv']['environment']}")
+
+if nfss.count > 0
+  # There should be only 1 monolithic right?
+  nfs = nfss.first
+  
+  # Get the IP for the NFS mount
+  nfs_ip = nfs['ipaddress']
+  
+  # Only know if the monolithic knows about us
+  if nfs['demoenv']['kvm_hosts']
+    do_mount_nfs = true if nfs['demoenv']['kvm_hosts'].include?(node['ipaddress'])
+  end
+end
+
+# Decide if we can mount
+do_mount = do_mount_monolithic && do_mount_nfs
 
 # setup NFS and install AIM
 include_recipe "nfs"
 include_recipe "abiquo::repository"
 include_recipe "abiquo::install_kvm"
 
-directory '/var/lib/virt' do
-  owner 'root'
-  group 'root'
-  mode '0755'
-  recursive true
-  action :create
+%w(/var/lib/virt /sharedds-1 /sharedds-2).each do |dir|
+  directory dir do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    recursive true
+    action :create
+  end
 end
 
 # Do AIM setup only if we can use NFS
@@ -59,6 +80,14 @@ else
     nfs_share = "#{monolithic_ip}:/opt/vm_repository"
     node.set['abiquo']['nfs']['location'] = nfs_share
     include_recipe "abiquo::setup_kvm"
+
+    %w(/sharedds-1 /sharedds-2).each do |dsname|
+      mount dsname do
+        device "#{nfs_ip}:/nfs#{dsname}"
+        fstype 'nfs'
+        action [:enable, :mount]
+      end
+    end
 
     if node['system']['short_hostname'].eql? "#{node['demoenv']['environment']}-#{node['abiquo']['profile']}-#{node['ipaddress'].gsub(".", "-")}"
       abiquo_api_machine "#{node['ipaddress']}" do 

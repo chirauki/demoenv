@@ -7,6 +7,8 @@
 # All rights reserved - Do Not Redistribute
 #
 
+Chef::Recipe.send(:include, Demoenv::Checks::API)
+
 # Install Abiquo API gem
 include_recipe "abiquo_api::default"
 
@@ -70,7 +72,7 @@ ruby_block "obtain a demo license" do
       "batch" => true
     }.to_json
 
-    req = Net::HTTP::Post.new(uri.request_uri, initheader = {'Content-Type' =>'application/json'})
+    req = Net::HTTP::Post.new(uri.request_uri, {'Content-Type' =>'application/json'})
     req.body = param_hash
     response = http.request(req)
 
@@ -104,10 +106,15 @@ service "nfs" do
 end
 
 # File required in order to use the vm_repository
+directory '/opt/vm_repository' do
+  owner 'tomcat'
+  group 'root'
+end
+
 file '/opt/vm_repository/.abiquo_repository' do 
   content ''
-  owner 'root'
-  group 'root'
+  owner 'tomcat'
+  group 'tomcat'
 end
 
 unless node['demoenv']['license'].nil?
@@ -191,7 +198,7 @@ abiquo_api_remote_service "http://#{node['ipaddress']}:8009/ssm" do
   ignore_failure true
 end
 
-abiquo_api_remote_service "https://#{node['ipaddress']}.xip.io:443/am" do
+abiquo_api_remote_service "https://#{node['ipaddress']}.nip.io:443/am" do
   type "APPLIANCE_MANAGER"
   uuid node['abiquo']['properties']['abiquo.datacenter.id']
   datacenter node['demoenv']['datacenter_name']
@@ -234,31 +241,60 @@ abiquo_api_remote_repository 'Repository 3.0' do
   ignore_failure true
 end
 
-abiquo_api_template_download 'yVM' do
-  datacenter node['demoenv']['datacenter_name']
-  remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
-  abiquo_connection_data node['demoenv']['abiquo_connection_data']
-  action :download
-  only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
-  ignore_failure true
-end
+if can_download_templates(node['demoenv']['abiquo_connection_data'])
+  abiquo_api_template_download 'yVM' do
+    datacenter node['demoenv']['datacenter_name']
+    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    abiquo_connection_data node['demoenv']['abiquo_connection_data']
+    action :download
+    only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+    ignore_failure true
+  end
 
-abiquo_api_template_download 'm0n0wall 1.3b18-i386' do
-  datacenter node['demoenv']['datacenter_name']
-  remote_repository_url "http://abiquo-repository.abiquo.com/ovfindex.xml"
-  abiquo_connection_data node['demoenv']['abiquo_connection_data']
-  action :download
-  only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
-  ignore_failure true
-end
+  abiquo_api_template_download 'Alpine Linux' do
+    datacenter node['demoenv']['datacenter_name']
+    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    abiquo_connection_data node['demoenv']['abiquo_connection_data']
+    action :download
+    only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+    ignore_failure true
+  end
 
-abiquo_api_template_download 'Centos 5.6 x86_64' do
-  datacenter node['demoenv']['datacenter_name']
-  remote_repository_url "http://abiquo-repository.abiquo.com/ovfindex.xml"
-  abiquo_connection_data node['demoenv']['abiquo_connection_data']
-  action :download
-  only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
-  ignore_failure true
+  abiquo_api_template_download 'Centos 7 x86_64' do
+    datacenter node['demoenv']['datacenter_name']
+    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    abiquo_connection_data node['demoenv']['abiquo_connection_data']
+    action :download
+    only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+    ignore_failure true
+  end
+
+  abiquo_api_template_download 'Ubuntu 16.04 x86_64' do
+    datacenter node['demoenv']['datacenter_name']
+    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    abiquo_connection_data node['demoenv']['abiquo_connection_data']
+    action :download
+    only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+    ignore_failure true
+  end
+
+  abiquo_api_template_download 'VyOS 1.1.7' do
+    datacenter node['demoenv']['datacenter_name']
+    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    abiquo_connection_data node['demoenv']['abiquo_connection_data']
+    action :download
+    only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+    ignore_failure true
+  end
+
+  abiquo_api_template_download 'openSUSE 42.2 x86_64' do
+    datacenter node['demoenv']['datacenter_name']
+    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    abiquo_connection_data node['demoenv']['abiquo_connection_data']
+    action :download
+    only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+    ignore_failure true
+  end
 end
 
 # Ensure DHCPd is present

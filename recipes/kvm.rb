@@ -26,7 +26,7 @@ if monolithics.count > 0
   
   # Get the IP for the NFS mount
   monolithic_ip = monolithic['ipaddress']
-  node.set['demoenv']['abiquo_connection_data']['abiquo_api_url'] = "https://#{monolithic_ip}.nip.io/api"
+  node.set['demoenv']['abiquo_connection_data']['abiquo_api_url'] = "https://#{node['demoenv']['environment']}.#{node['demoenv']['lab_domain']}/api"
 
   # Only know if the monolithic knows about us
   if monolithic['demoenv']['kvm_hosts']

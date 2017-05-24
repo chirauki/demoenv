@@ -9,6 +9,27 @@
 
 Chef::Recipe.send(:include, Demoenv::Checks::API)
 
+# Create the DNS record
+g = chef_gem 'chef-vault' do
+  action :nothing
+end
+g.run_action(:install)
+
+require 'chef-vault'
+include_recipe "route53"
+
+vault = ChefVault::Item.load("aws", "route53")
+route53_record "#{node['demoenv']['environment']}.#{node['demoenv']['lab_domain']}" do
+  value node['ipaddress']
+  type  "A"
+  zone_id               node['route53']['zone_id']
+  aws_access_key_id     vault['access_key']
+  aws_secret_access_key vault['secret_access_key']
+  overwrite true
+  fail_on_error false
+  action :create
+end
+
 # Install Abiquo API gem
 include_recipe "abiquo_api::default"
 
@@ -198,7 +219,7 @@ abiquo_api_remote_service "http://#{node['ipaddress']}:8009/ssm" do
   ignore_failure true
 end
 
-abiquo_api_remote_service "https://#{node['ipaddress']}.nip.io:443/am" do
+abiquo_api_remote_service "https://#{node['demoenv']['environment']}.#{node['demoenv']['lab_domain']}:443/am" do
   type "APPLIANCE_MANAGER"
   uuid node['abiquo']['properties']['abiquo.datacenter.id']
   datacenter node['demoenv']['datacenter_name']
@@ -297,8 +318,18 @@ if can_download_templates(node['demoenv']['abiquo_connection_data'])
   end
 end
 
-# Ensure DHCPd is present
 package 'dhcp'
+
+file "/etc/dhcp/dhcpd.conf" do
+  owner 'root'
+  group 'root'
+  mode 0755
+  lazy { content ::File.open("/opt/abiquo/config/examples/dhcpd.conf").read }
+  action :create
+  notify :restart, 'service[dhcpd]'
+end
+
+# Ensure DHCPd is present
 service 'dhcpd' do
   action [:enable, :start]
 end

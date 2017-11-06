@@ -72,6 +72,21 @@ if kvm_hosts.count > 0
   include_recipe 'demoenv::tunnels_monolithic'
 end
 
+# Reporting
+reportings = search(:node, "role:demo-reporting AND environment:#{node['demoenv']['environment']}")
+if reportings.count > 0
+  reporting_ip = reportings.first['ipaddress']
+
+  node.set['abiquo']['ui_proxies']['/jasperserver'] = {
+    'url' => "http://#{reporting_ip}:8888/jasperserver"
+  }
+
+  abiquo_api_system_property 'client.main.billingUrl' do
+    value "https://#{node['demoenv']['environment']}.#{node['demoenv']['lab_domain']}/jasperserver"
+    abiquo_connection_data node['demoenv']['abiquo_connection_data']
+  end
+end
+
 # Firewall
 include_recipe "iptables"
 iptables_rule "firewall-nfs"
@@ -103,8 +118,27 @@ ruby_block "obtain a demo license" do
   only_if { node['demoenv']['license'].nil? || node['demoenv']['license'].empty? }
 end
 
+# MariaDB Listen address
+node.set['mariadb']['mysqld']['bind_address'] = '0.0.0.0'
+
 # Install Abiquo
 include_recipe "abiquo::default"
+
+# Replication user
+conn_info = {
+  host: '127.0.0.1',
+  username: 'root',
+  password: node['mariadb']['server_root_password'],
+}
+
+mysql_database_user "replication-user" do
+  connection    conn_info
+  username      node['demoenv']['replication_user']
+  password      node['demoenv']['replication_password']
+  host          '%'
+  privileges    ['REPLICATION SLAVE']
+  action        :grant
+end
 
 # If we know about KVM hosts, setup NFS export
 if node['demoenv']['kvm_hosts']
@@ -299,7 +333,7 @@ if can_download_templates(node['demoenv']['abiquo_connection_data'])
     ignore_failure true
   end
 
-  abiquo_api_template_download 'VyOS 1.1.7' do
+  abiquo_api_template_download 'pfSense CE 2.3.4' do
     datacenter node['demoenv']['datacenter_name']
     remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
     abiquo_connection_data node['demoenv']['abiquo_connection_data']
@@ -324,9 +358,9 @@ file "/etc/dhcp/dhcpd.conf" do
   owner 'root'
   group 'root'
   mode 0755
-  lazy { content ::File.open("/opt/abiquo/config/examples/dhcpd.conf").read }
+  content lazy { ::File.open("/opt/abiquo/config/examples/dhcpd.conf").read }
   action :create
-  notify :restart, 'service[dhcpd]'
+  notifies :restart, 'service[dhcpd]'
 end
 
 # Ensure DHCPd is present

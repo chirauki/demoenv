@@ -8,7 +8,6 @@ gem 'chef', '~> 12.16.42'
 gem 'cookstyle', '~> 2.0.0', group: :lint
 gem 'dep_selector'
 gem 'foodcritic', '~> 10.3.1', group: :lint
-gem 'chef-vault'
 
 group :integration, :test, :development do
   gem 'abiquo-api', '~> 0.1.2'

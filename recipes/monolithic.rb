@@ -9,27 +9,6 @@
 
 Chef::Recipe.send(:include, Demoenv::Checks::API)
 
-# Create the DNS record
-g = chef_gem 'chef-vault' do
-  action :nothing
-end
-g.run_action(:install)
-
-require 'chef-vault'
-include_recipe "route53"
-
-vault = ChefVault::Item.load("aws", "route53")
-route53_record "#{node['demoenv']['environment']}.#{node['demoenv']['lab_domain']}" do
-  value node['ipaddress']
-  type  "A"
-  zone_id               node['route53']['zone_id']
-  aws_access_key_id     vault['access_key']
-  aws_secret_access_key vault['secret_access_key']
-  overwrite true
-  fail_on_error false
-  action :create
-end
-
 # Install Abiquo API gem
 include_recipe "abiquo_api::default"
 

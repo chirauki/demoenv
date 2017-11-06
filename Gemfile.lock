@@ -87,7 +87,6 @@ GEM
       fuzzyurl
       mixlib-config (~> 2.0)
       mixlib-shellout (~> 2.0)
-    chef-vault (3.2.0)
     chef-zero (13.1.0)
       ffi-yajl (~> 2.2)
       hashie (>= 2.0, < 4.0)
@@ -320,7 +319,6 @@ DEPENDENCIES
   abiquo-api (~> 0.1.2)
   berkshelf
   chef (~> 12.16.42)
-  chef-vault
   cookstyle (~> 2.0.0)
   dep_selector
   foodcritic (~> 10.3.1)

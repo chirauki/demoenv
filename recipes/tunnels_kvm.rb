@@ -7,10 +7,11 @@
 # All rights reserved - Do Not Redistribute
 #
 
-%w(l2tp_eth 8021q).each do |mod|
+%w(8021q l2tp_eth).each do |mod|
   kernel_module mod do
     onboot true
     check_availability true
+    action :load
   end
 end
 

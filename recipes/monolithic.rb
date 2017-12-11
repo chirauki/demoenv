@@ -59,11 +59,6 @@ if reportings.count > 0
   node.set['abiquo']['ui_proxies']['/jasperserver'] = {
     'url' => "http://#{reporting_ip}:8888/jasperserver"
   }
-
-  abiquo_api_system_property 'client.main.billingUrl' do
-    value "https://#{node['demoenv']['environment']}.#{node['demoenv']['lab_domain']}/jasperserver"
-    abiquo_connection_data node['demoenv']['abiquo_connection_data']
-  end
 end
 
 # Firewall
@@ -208,6 +203,14 @@ abiquo_api_remote_service "http://#{node['ipaddress']}:8009/vsm" do
   ignore_failure true
 end
 
+abiquo_api_remote_service "guacd://#{node['ipaddress']}:4822/" do
+  type "REMOTE_ACCESS"
+  datacenter [node['demoenv']['datacenter_name'], "DO ams2"]
+  abiquo_connection_data node['demoenv']['abiquo_connection_data']
+  action :create
+  ignore_failure true
+end
+
 abiquo_api_remote_service "http://#{node['ipaddress']}:8009/nodecollector" do
   type "NODE_COLLECTOR"
   datacenter [node['demoenv']['datacenter_name'], "DO ams2"]
@@ -303,7 +306,7 @@ if can_download_templates(node['demoenv']['abiquo_connection_data'])
     ignore_failure true
   end
 
-  abiquo_api_template_download 'Ubuntu 16.04 x86_64' do
+  abiquo_api_template_download 'Ubuntu 16.04 LTS x86_64' do
     datacenter node['demoenv']['datacenter_name']
     remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
     abiquo_connection_data node['demoenv']['abiquo_connection_data']
@@ -326,6 +329,15 @@ if can_download_templates(node['demoenv']['abiquo_connection_data'])
     remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
     abiquo_connection_data node['demoenv']['abiquo_connection_data']
     action :download
+    only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
+    ignore_failure true
+  end
+end
+
+if reportings.count > 0
+  abiquo_api_system_property 'client.main.billingUrl' do
+    value "https://#{node['demoenv']['environment']}.#{node['demoenv']['lab_domain']}/jasperserver"
+    abiquo_connection_data node['demoenv']['abiquo_connection_data']
     only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
     ignore_failure true
   end

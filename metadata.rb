@@ -4,7 +4,7 @@ maintainer_email 'marc.cirauqui@abiquo.com'
 license          'Apache 2.0'
 description      'Installs/Configures an Abiquo demo environment'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '0.1.7'
+version          '0.1.8'
 
 supports 'centos', '>= 6.5'
 
@@ -17,5 +17,4 @@ depends 'iptables', '~> 2.0.1'
 depends 'chef-client', '~> 4.3.2'
 depends 'ssh_authorized_keys', '~> 0.3.0'
 depends 'kernel-modules', '~> 0.1.4'
-depends 'route53', '~> 1.2.1'
 depends 'database', '~> 5.1.2'

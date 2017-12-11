@@ -16,9 +16,9 @@
       "name": "AWS eu-west-1"
     },
     {
-      "provider": "AZURE",
-      "region": "West Europe",
-      "name": "Azure West EU"
+      "provider": "azurecompute-arm",
+      "region": "westeurope",
+      "name": "Azure ARM West EU"
     }
   ],
   "id": "regions"

@@ -7,10 +7,9 @@
 # All rights reserved - Do Not Redistribute
 #
 
-%w(8021q l2tp_eth).each do |mod|
+%w(8021q l2tp_core l2tp_netlink l2tp_eth).each do |mod|
   kernel_module mod do
     onboot true
-    check_availability true
     action :load
   end
 end
@@ -41,14 +40,20 @@ else
 
   execute "create-tunnel-session-with-#{monolithic_ip}" do
     command "ip l2tp add session tunnel_id #{my_tunnel['tunnel_id']} session_id #{my_tunnel['tunnel_id']} peer_session_id #{my_tunnel['tunnel_id']}"
-    action :nothing
-    subscribes :run, "execute[create-tunnel-with-#{monolithic_ip}]", :immediately
+    action :run
+    not_if "ip l2tp show session | grep \"Session #{my_tunnel['tunnel_id']} in tunnel #{my_tunnel['tunnel_id']}\""
   end
 
   execute "set-link-mtu" do
-    command "ip link set dev l2tpeth0 up mtu 1500"
-    action :nothing
-    subscribes :run, "execute[create-tunnel-with-#{monolithic_ip}]", :immediately
+    command "ip link set dev l2tpeth0 mtu 1500"
+    action :run
+    not_if "ip link show dev l2tpeth0 | grep \"mtu 1500\""
+  end
+
+  execute "set-link-up" do
+    command "ip link set dev l2tpeth0 up"
+    action :run
+    not_if "ip link show dev l2tpeth0 | grep \"state UP\""
   end
 end
 

@@ -59,7 +59,7 @@ GRAPH
   cron (5.0.1)
   database (5.1.2)
     postgresql (>= 1.0.0)
-  demoenv (0.1.7)
+  demoenv (0.1.8)
     abiquo (~> 0.12.0)
     abiquo-reporting (~> 0.1.0)
     abiquo_api (~> 0.1.2)

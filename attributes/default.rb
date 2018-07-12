@@ -16,7 +16,11 @@ default['abiquo']['db']['user'] = 'abiquo'
 default['abiquo']['db']['password'] = 'abiqu0!'
 default['abiquo']['db']['from'] = '%'
 default['abiquo']['db']['enable-master'] = true
-
+default['redisio']['servers'] = [{
+  'name' => 'master',
+  'port' => 6379,
+  'address' => '127.0.0.1',
+}]
 default['abiquo']['profile'] = "monolithic"
 default['abiquo']['nfs']['location'] = nil
 default['abiquo']['properties']['abiquo.appliancemanager.checkMountedRepository'] = false

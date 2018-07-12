@@ -271,7 +271,7 @@ end
 
 # Download some templates
 abiquo_api_remote_repository 'Repository 3.0' do
-  url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+  url "https://abq-repo-test.s3.amazonaws.com/ovfindex.xml"
   abiquo_connection_data node['demoenv']['abiquo_connection_data']
   action :create
   only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
@@ -281,7 +281,7 @@ end
 if can_download_templates(node['demoenv']['abiquo_connection_data'])
   abiquo_api_template_download 'yVM' do
     datacenter node['demoenv']['datacenter_name']
-    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    remote_repository_url "https://abq-repo-test.s3.amazonaws.com/ovfindex.xml"
     abiquo_connection_data node['demoenv']['abiquo_connection_data']
     action :download
     only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
@@ -290,7 +290,7 @@ if can_download_templates(node['demoenv']['abiquo_connection_data'])
 
   abiquo_api_template_download 'Alpine Linux' do
     datacenter node['demoenv']['datacenter_name']
-    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    remote_repository_url "https://abq-repo-test.s3.amazonaws.com/ovfindex.xml"
     abiquo_connection_data node['demoenv']['abiquo_connection_data']
     action :download
     only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
@@ -299,7 +299,7 @@ if can_download_templates(node['demoenv']['abiquo_connection_data'])
 
   abiquo_api_template_download 'Centos 7 x86_64' do
     datacenter node['demoenv']['datacenter_name']
-    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    remote_repository_url "https://abq-repo-test.s3.amazonaws.com/ovfindex.xml"
     abiquo_connection_data node['demoenv']['abiquo_connection_data']
     action :download
     only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
@@ -308,7 +308,7 @@ if can_download_templates(node['demoenv']['abiquo_connection_data'])
 
   abiquo_api_template_download 'Ubuntu 16.04 LTS x86_64' do
     datacenter node['demoenv']['datacenter_name']
-    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    remote_repository_url "https://abq-repo-test.s3.amazonaws.com/ovfindex.xml"
     abiquo_connection_data node['demoenv']['abiquo_connection_data']
     action :download
     only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
@@ -317,7 +317,7 @@ if can_download_templates(node['demoenv']['abiquo_connection_data'])
 
   abiquo_api_template_download 'pfSense CE 2.3.4' do
     datacenter node['demoenv']['datacenter_name']
-    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    remote_repository_url "https://abq-repo-test.s3.amazonaws.com/ovfindex.xml"
     abiquo_connection_data node['demoenv']['abiquo_connection_data']
     action :download
     only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"
@@ -326,7 +326,7 @@ if can_download_templates(node['demoenv']['abiquo_connection_data'])
 
   abiquo_api_template_download 'openSUSE 42.2 x86_64' do
     datacenter node['demoenv']['datacenter_name']
-    remote_repository_url "http://s3-eu-west-1.amazonaws.com/packer-repo/ovfindex.xml"
+    remote_repository_url "https://abq-repo-test.s3.amazonaws.com/ovfindex.xml"
     abiquo_connection_data node['demoenv']['abiquo_connection_data']
     action :download
     only_if "while /bin/netstat -lnt | awk '$4 ~ /:8009$/ {exit 1}'; do /bin/sleep 2; done && /usr/bin/curl -u admin:xabiquo http://localhost:8009/api/version -H 'Accept: text/plain' -s > /dev/null"

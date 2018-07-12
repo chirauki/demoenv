@@ -7,10 +7,9 @@
 # All rights reserved - Do Not Redistribute
 #
 
-%w(8021q l2tp_eth).each do |mod|
+%w(8021q l2tp_core l2tp_netlink l2tp_eth).each do |mod|
   kernel_module mod do
     onboot true
-    check_availability true
     action :load
   end
 end
@@ -27,15 +26,22 @@ node['demoenv']['tunnel_info'].keys.each do |kvm_ip|
 
   execute "create-tunnel-session-with-#{kvm_ip}" do
     command "ip l2tp add session tunnel_id #{tunnel_info['tunnel_id']} session_id #{tunnel_info['tunnel_id']} peer_session_id #{tunnel_info['tunnel_id']}"
-    action :nothing
-    subscribes :run, "execute[create-tunnel-with-#{kvm_ip}]", :immediately
+    action :run
+    not_if "ip l2tp show session | grep \"Session #{tunnel_info['tunnel_id']} in tunnel #{tunnel_info['tunnel_id']}\""
   end
 
   ifindex = tunnel_info['tunnel_id'] - 1
   execute "set-link-mtu" do
-    command "ip link set dev l2tpeth#{ifindex} up mtu 1500"
-    action :nothing
-    subscribes :run, "execute[create-tunnel-with-#{kvm_ip}]", :immediately
+    command "ip link set dev l2tpeth#{ifindex} mtu 1500"
+    action :run
+    not_if "ip link show dev l2tpeth#{ifindex} | grep \"mtu 1500\""
+    notifies :restart, 'service[dhcpd]'
+  end
+
+  execute "set-link-up" do
+    command "ip link set dev l2tpeth#{ifindex} up"
+    action :run
+    not_if "ip link show dev l2tpeth#{ifindex} | grep \"state UP\""
     notifies :restart, 'service[dhcpd]'
   end
 end
